@@ -1,0 +1,20 @@
+# Cline Configuration Rules
+
+## Platforms & shells
+- **Primary**: Omarchy (Arch) Linux, bash. **Secondary**: Windows 11, PowerShell or Git Bash.
+- Pick the shell that matches the host; do not assume Windows.
+
+## This repository
+- One solution, `FilenameTools.sln`.
+- Build: `dotnet build FilenameTools.sln`; test: `dotnet test FilenameTools.sln` (78 tests).
+- `local_user_files/` is machine-local scratch (git-ignored).
+- Conventions and gotchas for the code: `CLAUDE.md`.
+
+## Conventions
+- Never hard-code a machine path; build paths with `Path.Combine`.
+- `.editorconfig` is the source of truth for formatting and style.
+- LF everywhere - repository and working tree (`.gitattributes`). Never introduce CRLF.
+- Commit messages are public text: no user folder, profile path or account name, and never a
+  description of content that was removed or anonymised. Conventional Commits, imperative subject.
+- Skills live in `.agents/skills/`, tracked and tool-neutral; Claude Code reaches the same files
+  through the local `.claude/skills` symlink.

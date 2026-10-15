@@ -1,0 +1,33 @@
+# Generated build artifacts
+**/bin/
+**/obj/
+**/dist/
+**/build/
+**/.vs/
+
+# Compiled binaries
+**/*.dll
+**/*.exe
+**/*.pdb
+**/*.nupkg
+**/*.cache
+**/*.user
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Package managers
+**/node_modules/
+
+# Large data / datasets
+**/*.zip
+**/*.tar.gz
+**/*.7z
+**/*.bak
+**/*.csv
+
+# IDE metadata
+**/.idea/
+**/*.suo
