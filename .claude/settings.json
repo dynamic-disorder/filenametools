@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet *)",
+      "Bash(dotnet build)",
+      "Bash(dotnet run)",
+      "Bash(dotnet test)",
+      "Bash(dotnet restore)",
+      "Bash(dotnet clean)",
+      "Bash(dotnet publish)",
+      "Bash(powershell *)",
+      "Bash(pwsh *)",
+      "Bash(git *)",
+      "Bash(dir)",
+      "Bash(cd *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(cat *)",
+      "Bash(type *)",
+      "Bash(echo *)",
+      "Bash(where *)",
+      "Bash(which *)",
+      "Bash(ren *)",
+      "Bash(rename *)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf C:*)",
+      "Bash(format *)",
+      "Bash(del /S /Q C:*)",
+      "Bash(rd /S /Q C:*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(*.secret)",
+      "Read(*.key)"
+    ]
+  },
+  "env": {
+    "OS": "Windows_NT",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
+  }
+}

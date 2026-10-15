@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<RootNamespace>FilenameSanitizer</RootNamespace>
+		<AssemblyName>FilenameSanitizer</AssemblyName>
+
+		<!-- NuGet Metadata -->
+		<PackageId>FilenameSanitizer</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>dynamic-disorder</Authors>
+		<Company>No company. Just a private person.</Company>
+		<Description>Sanitizes filenames for safe usage across platforms and file systems.</Description>
+		<PackageTags>filename,sanitizer,filesystem,cli,utility</PackageTags>
+		<RepositoryUrl>https://github.com/dynamic-disorder/prototype-k</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<!-- Generate the NuGet package on every build -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Title>Filename sanitizer utility</Title>
+	</PropertyGroup>
+
+	<!-- System.Text.Json is part of the net10.0 shared framework; referencing the
+	     package explicitly is redundant and triggers NU1510. -->
+	<ItemGroup>
+		<Content Include="sanitizer_replace_patterns.txt" CopyToOutputDirectory="Always" />
+		<Content Include="sanitizer_settings.json" CopyToOutputDirectory="Always" />
+	</ItemGroup>	
+
+</Project>

@@ -1,0 +1,61 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilenameSanitizer", "FilenameSanitizer\FilenameSanitizer.csproj", "{90830A64-04D3-4040-B6E0-838F91B6E51E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilenameSanitizer.Tests", "FilenameSanitizer.Tests\FilenameSanitizer.Tests.csproj", "{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilenameSanitizerCli", "FilenameSanitizerCli\FilenameSanitizerCli.csproj", "{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|x64.Build.0 = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Debug|x86.Build.0 = Debug|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|x64.ActiveCfg = Release|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|x64.Build.0 = Release|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|x86.ActiveCfg = Release|Any CPU
+		{90830A64-04D3-4040-B6E0-838F91B6E51E}.Release|x86.Build.0 = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|x64.Build.0 = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Debug|x86.Build.0 = Debug|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|x64.ActiveCfg = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|x64.Build.0 = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC86E01B-09F2-4580-9E14-0D732CE2FDA0}.Release|x86.Build.0 = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|x64.Build.0 = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Debug|x86.Build.0 = Debug|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|x64.ActiveCfg = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|x64.Build.0 = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|x86.ActiveCfg = Release|Any CPU
+		{86820A62-BA98-C0D5-5CD5-CF5E65B942CE}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

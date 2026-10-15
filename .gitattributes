@@ -1,0 +1,20 @@
+# Line endings: LF in the repository AND in the working tree, on every platform.
+#
+# Linux (Omarchy/Arch) is the primary development platform since Oct 2026, so the
+# previous Windows-first policy (CRLF for *.cs/*.csproj/*.sln) produced constant
+# "LF will be replaced by CRLF" / "CRLF will be replaced by LF" churn and left files
+# with mixed endings. `text=auto` still detects binary content automatically, and the
+# explicit binary rules below are belt-and-braces. On Windows, `core.autocrlf=false`
+# and modern editors (VS 2022, VS Code) handle LF without issue.
+* text=auto eol=lf
+
+# Binary files (never converted, never diffed)
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.dll       binary
+*.exe       binary
+*.zip       binary
+*.csv       binary
