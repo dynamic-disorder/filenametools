@@ -59,7 +59,7 @@ FilenameSanitizer.log.*.txt
 .DS_Store
 Thumbs.db
 
-# Self-contained publish output from publish-selfcontained.mjs
+# Self-contained publish output
 /publish/
 
 # Local agent glue and scratch - never tracked
