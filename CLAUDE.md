@@ -42,7 +42,7 @@ FilenameSanitizerCli /home/me/Files 'prefix-;_old;.bak'   # also strip these pat
 ## Common Tasks
 
 ```bash
-# From FilenameTools/
+# From the repository root
 dotnet build FilenameTools.sln              # Debug; also works with -c Release
 dotnet test FilenameTools.sln               # 78 tests
 dotnet run --project FilenameSanitizerCli -- <folder> [patterns]
