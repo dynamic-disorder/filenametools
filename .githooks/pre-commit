@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Git pre-commit hook, activated by `git config core.hooksPath .githooks`.
+#
+# A thin wrapper on purpose: the build gate lives in exactly one file, which also serves as the
+# harness PreToolUse hook. There it reads the tool-call JSON that Claude Code / DSH put on stdin;
+# here git passes no payload at all, and the script reads that as "this is a commit, check it".
+# Keeping one file means the two entry points cannot drift apart.
+
+gate="$(git rev-parse --show-toplevel)/.claude/hooks/pre-commit-build-check.sh"
+[ -x "$gate" ] || exit 0
+exec "$gate"
