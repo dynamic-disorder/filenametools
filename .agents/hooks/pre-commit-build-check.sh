@@ -77,6 +77,25 @@ if [ -n "$command_text" ]; then
 fi
 # Git-hook mode (no payload) falls through to the check below: git only runs it for a commit.
 
+# The vendored agent entries. .agents/ holds copies of the agent-skills source, and a copy that has
+# drifted teaches the old rule silently. Check this repository only, and skip when the source is not
+# beside it: a lone clone must not be blocked over an umbrella it does not have.
+sync_script="$project_dir/../agent-skills/scripts/sync-skills.mjs"
+if [ -f "$sync_script" ] && command -v node >/dev/null 2>&1; then
+  repo_name="$(basename "$project_dir")"
+  sync_output="$(node "$sync_script" --root "$(dirname "$project_dir")" --target "$repo_name" 2>&1)"
+  sync_status=$?
+  case "$sync_status" in
+    0) ;;
+    2) echo "[pre-commit] $repo_name is not managed by agent-skills — skipping the skill check" >&2 ;;
+    *)
+      echo "$sync_output" >&2
+      echo "[pre-commit] .agents drifted from agent-skills — run: node ../agent-skills/scripts/sync-skills.mjs --write --target $repo_name" >&2
+      exit 2
+      ;;
+  esac
+fi
+
 # Only C#-relevant changes need a build.
 staged="$(git diff --staged --name-only 2>/dev/null | grep -E '\.(cs|csproj|props|targets)$')"
 [ -n "$staged" ] || exit 0
