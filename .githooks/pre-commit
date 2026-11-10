@@ -6,6 +6,6 @@
 # here git passes no payload at all, and the script reads that as "this is a commit, check it".
 # Keeping one file means the two entry points cannot drift apart.
 
-gate="$(git rev-parse --show-toplevel)/.claude/hooks/pre-commit-build-check.sh"
+gate="$(git rev-parse --show-toplevel)/.agents/hooks/pre-commit-build-check.sh"
 [ -x "$gate" ] || exit 0
 exec "$gate"

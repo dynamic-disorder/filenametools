@@ -8,7 +8,7 @@
 - One solution, `FilenameTools.sln`.
 - Build: `dotnet build FilenameTools.sln`; test: `dotnet test FilenameTools.sln` (78 tests).
 - `local_user_files/` is machine-local scratch (git-ignored).
-- Conventions and gotchas for the code: `CLAUDE.md`.
+- Conventions and gotchas for the code: `AGENTS.md`.
 
 ## Conventions
 - Never hard-code a machine path; build paths with `Path.Combine`.
@@ -16,5 +16,5 @@
 - LF everywhere - repository and working tree (`.gitattributes`). Never introduce CRLF.
 - Commit messages are public text: no user folder, profile path or account name, and never a
   description of content that was removed or anonymised. Conventional Commits, imperative subject.
-- Skills live in `.agents/skills/`, tracked and tool-neutral; Claude Code reaches the same files
-  through the local `.claude/skills` symlink.
+- Skills live in `.agents/skills/`, tracked and tool-neutral; every harness reads them there.
+  The pre-commit build gate is `.agents/hooks/pre-commit-build-check.sh`.
