@@ -20,7 +20,7 @@ enforces that only for `ReferenceEquals` (`IDE0041`), not for `==`.
 
 **XML docs.** Production code documents public and internal types *and* their members, so put
 `/// <summary>` on what you add or change and leave untouched members alone. Test projects
-differ: document the test class only, never individual `[Fact]` methods.
+document the test class and every test method with a brief `/// <summary>`.
 
 ## Correcting a stale rule
 

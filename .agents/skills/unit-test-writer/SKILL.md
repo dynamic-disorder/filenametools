@@ -20,8 +20,9 @@ at restore on Linux.
 
 ## Conventions
 
-- `public sealed class <ClassName>Tests` in `<ClassName>Tests.cs`; one `/// <summary>` on the class,
-  not on individual test methods.
+- `public sealed class <ClassName>Tests` in `<ClassName>Tests.cs`; one `/// <summary>` on the class
+  and a brief one on every test method — the sentence says what the test proves, and the
+  `Given:`/`When:`/`Then:` steps carry the detail.
 - Test names: `MethodName_StateUnderTest_ExpectedBehaviour`. The underscores are why each test
   `.csproj` carries `<NoWarn>CA1707</NoWarn>`.
 - `// Given:` / `// When:` / `// Then:` sections; `[Theory]` + `[InlineData]` for parameterized cases.
@@ -41,6 +42,7 @@ public sealed class ParserTests
 {
     private readonly IStore _store = A.Fake<IStore>();
 
+    /// <summary>Verifies that a dirty value is normalised before it is stored.</summary>
     [Fact]
     public void Parse_DirtyName_ReturnsSanitizedForm()
     {
