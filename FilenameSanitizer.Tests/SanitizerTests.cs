@@ -8,6 +8,9 @@ using Xunit;
 
 namespace FilenameSanitizer.Tests;
 
+/// <summary>
+/// Covers sanitising filenames and judging whether a name is already sanitised.
+/// </summary>
 public class SanitizerTests
 {
     private static Sanitizer SetUpSut(string replacementCharacter = "_", List<string>? excludedChars = null)
@@ -97,6 +100,9 @@ public class SanitizerTests
         return new Sanitizer(sanitizerSettingsLoader, patternLoader, fileSystem);
     }
 
+    /// <summary>
+    /// Verifies that invalid characters become spaces and reserved names are prefixed.
+    /// </summary>
     [Theory]
     [InlineData("test:file.txt", "test file.txt")]
     [InlineData("test/file.txt", "test file.txt")]
@@ -117,6 +123,9 @@ public class SanitizerTests
         actual.ShouldBe(expected);
     }
 
+    /// <summary>
+    /// Verifies that the default replacement character turns invalid characters into underscores.
+    /// </summary>
     [Theory]
     [InlineData("test:file.txt", "test_file.txt")]
     [InlineData("test/file.txt", "test_file.txt")]
@@ -137,6 +146,9 @@ public class SanitizerTests
         actual.ShouldBe(expected);
     }
 
+    /// <summary>
+    /// Verifies that a name is reported as sanitised only when it already matches the sanitised form.
+    /// </summary>
     [Theory]
     [InlineData("test_file.txt", true)]
     [InlineData("test:file.txt", false)]
@@ -155,6 +167,9 @@ public class SanitizerTests
         actual.ShouldBe(expected);
     }
 
+    /// <summary>
+    /// Verifies that each unsafe character becomes an underscore and the result is sanitised.
+    /// </summary>
     [Theory]
     [InlineData("test?file.txt")]
     [InlineData("test=file.txt")]
@@ -196,6 +211,9 @@ public class SanitizerTests
     }
 
     // Original test cases from FilenameSanitizer.Tests
+    /// <summary>
+    /// Verifies that an empty filename stays empty and is considered sanitised.
+    /// </summary>
     [Theory]
     [InlineData("")]
     public void SanitizeFilename_WithEmpty_ShouldReturnEmpty(string input)
@@ -211,6 +229,9 @@ public class SanitizerTests
         sut.IsFilenameSanitized(actual).ShouldBeTrue();
     }
 
+    /// <summary>
+    /// Verifies that a null filename becomes an empty string that counts as sanitised.
+    /// </summary>
     [Fact]
     public void SanitizeFilename_WithNull_ShouldReturnEmpty()
     {
@@ -226,6 +247,9 @@ public class SanitizerTests
         sut.IsFilenameSanitized(actual).ShouldBeTrue();
     }
 
+    /// <summary>
+    /// Verifies that excluded characters survive sanitisation while the rest are replaced.
+    /// </summary>
     [Theory]
     [InlineData("test-file.txt", "test-file.txt", '-')] // Excluded character should be preserved
     [InlineData("test#file.txt", "test#file.txt", '#')] // Excluded character should be preserved
@@ -243,6 +267,9 @@ public class SanitizerTests
         actual.ShouldBe(expected);
     }
 
+    /// <summary>
+    /// Verifies that the replacement character already present in a name is not replaced again.
+    /// </summary>
     [Fact]
     public void SanitizeFilename_WhenReplacementCharacterInInvalidChars_ShouldNotReplaceItself()
     {
@@ -256,6 +283,9 @@ public class SanitizerTests
         actual.ShouldBe("test_file_name.txt");
     }
 
+    /// <summary>
+    /// Verifies that every excluded character is preserved and the other invalid ones are replaced.
+    /// </summary>
     [Fact]
     public void SanitizeFilename_WithMultipleExcludedCharacters_ShouldPreserveAll()
     {
@@ -269,6 +299,9 @@ public class SanitizerTests
         actual.ShouldBe("test-file#name.txt");
     }
 
+    /// <summary>
+    /// Verifies that a dash survives when it is excluded, even with a space replacement character.
+    /// </summary>
     [Fact]
     public void SanitizeFilename_WhenReplacementCharacterIsSpaceAndDashExcluded_ShouldPreserveDash()
     {
@@ -282,6 +315,9 @@ public class SanitizerTests
         actual.ShouldBe("test-file.txt");
     }
 
+    /// <summary>
+    /// Verifies that the sanitizer keeps a dash the pattern loader reports as excluded.
+    /// </summary>
     [Fact]
     public void GetInvalidCharacters_WhenDashExcluded_ShouldNotIncludeDash()
     {
@@ -310,6 +346,9 @@ public class SanitizerTests
         result.ShouldBe("test-file.txt");
     }
 
+    /// <summary>
+    /// Verifies that a mixed filename keeps its dash while losing both invalid characters and patterns.
+    /// </summary>
     [Fact]
     public void SanitizeFilename_ComplexExampleWithDashExcluded_ShouldPreserveDash()
     {
@@ -335,6 +374,9 @@ public class SanitizerTests
         actual.ShouldNotContain("bad");
     }
 
+    /// <summary>
+    /// Verifies that sanitising loads the patterns and applies them with the replacement character.
+    /// </summary>
     [Fact]
     public void SanitizeWithSettings_ShouldApplyPatternsFromPatternLoader()
     {

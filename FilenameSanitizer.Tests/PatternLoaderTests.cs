@@ -8,10 +8,17 @@ using Xunit;
 
 namespace FilenameSanitizer.Tests;
 
+/// <summary>
+/// Covers loading replacement patterns, applying them to filenames, and filtering invalid characters.
+/// </summary>
 public class PatternLoaderTests
 {
     private static readonly string[] s_testPatternLines = ["bad", "big", "wolf", "_", "# comment", ""];
     private static readonly char[] s_testInvalidChars = ['!', '?', '-', '@'];
+
+    /// <summary>
+    /// Verifies that the patterns file is read and its comment and blank lines are ignored.
+    /// </summary>
     [Fact]
     public void PatternLoader_LoadReplacementPatterns_WhenFileExists_ShouldLoadPatterns()
     {
@@ -31,6 +38,9 @@ public class PatternLoaderTests
         patterns.ShouldBe(new List<string> { "bad", "big", "wolf", "_" });
     }
 
+    /// <summary>
+    /// Verifies that a missing patterns file yields an empty list rather than a failure.
+    /// </summary>
     [Fact]
     public void PatternLoader_LoadReplacementPatterns_WhenFileDoesNotExist_ShouldReturnEmptyList()
     {
@@ -49,6 +59,9 @@ public class PatternLoaderTests
         patterns.ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// Verifies that every occurrence of each pattern is replaced with the replacement text.
+    /// </summary>
     [Fact]
     public void PatternLoader_ApplyReplacementPatterns_ShouldReplaceAllPatterns()
     {
@@ -64,6 +77,9 @@ public class PatternLoaderTests
         result.ShouldBe("test      .txt");
     }
 
+    /// <summary>
+    /// Verifies that an empty pattern list leaves the filename unchanged.
+    /// </summary>
     [Fact]
     public void PatternLoader_ApplyReplacementPatterns_WithEmptyPatterns_ShouldReturnOriginal()
     {
@@ -79,6 +95,9 @@ public class PatternLoaderTests
         result.ShouldBe("test_file.txt");
     }
 
+    /// <summary>
+    /// Verifies that applying patterns leaves characters outside the pattern list untouched, dash included.
+    /// </summary>
     [Fact]
     public void PatternLoader_ApplyReplacementPatterns_WithDashExcluded_ShouldPreserveDash()
     {
@@ -95,6 +114,9 @@ public class PatternLoaderTests
         result.ShouldBe("test- - .txt");
     }
 
+    /// <summary>
+    /// Verifies that an excluded character is removed from the invalid-character set.
+    /// </summary>
     [Fact]
     public void PatternLoader_GetInvalidCharacters_WhenDashExcluded_ShouldNotIncludeDash()
     {
@@ -118,6 +140,9 @@ public class PatternLoaderTests
         invalidChars.ShouldContain('@');
     }
 
+    /// <summary>
+    /// Verifies that the replacement character itself is never treated as invalid.
+    /// </summary>
     [Fact]
     public void PatternLoader_GetInvalidCharacters_WhenReplacementCharacterIsDash_ShouldNotIncludeDash()
     {
@@ -141,6 +166,9 @@ public class PatternLoaderTests
         invalidChars.ShouldContain('@');
     }
 
+    /// <summary>
+    /// Verifies that every invalid character is returned when nothing is excluded.
+    /// </summary>
     [Fact]
     public void PatternLoader_GetInvalidCharacters_WithNoExclusions_ShouldIncludeAllInvalidChars()
     {
@@ -164,6 +192,9 @@ public class PatternLoaderTests
         invalidChars.ShouldContain('@');
     }
 
+    /// <summary>
+    /// Verifies that the replacement character is not flagged for replacement.
+    /// </summary>
     [Fact]
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsReplacement_ShouldReturnFalse()
     {
@@ -182,6 +213,9 @@ public class PatternLoaderTests
         shouldInclude.ShouldBeFalse();
     }
 
+    /// <summary>
+    /// Verifies that an excluded character is not flagged for replacement.
+    /// </summary>
     [Fact]
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsExcluded_ShouldReturnFalse()
     {
@@ -200,6 +234,9 @@ public class PatternLoaderTests
         shouldInclude.ShouldBeFalse();
     }
 
+    /// <summary>
+    /// Verifies that an invalid character outside the exclusions is flagged for replacement.
+    /// </summary>
     [Fact]
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsValid_ShouldReturnTrue()
     {

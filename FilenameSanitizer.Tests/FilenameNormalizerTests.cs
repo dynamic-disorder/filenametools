@@ -52,6 +52,9 @@ public class FilenameNormalizerTests
         return filePath;
     }
 
+    /// <summary>
+    /// Verifies that a file whose name is invalid for the OS is moved to its sanitised name.
+    /// </summary>
     [Theory]
     [InlineData("test:file.txt", "test_file.txt")]
     [InlineData("test<>file.txt", "test_file.txt")]
@@ -71,6 +74,9 @@ public class FilenameNormalizerTests
         A.CallTo(() => _fileSystem.MoveFile(filePathSource, filePathDestination)).MustHaveHappenedOnceExactly();
     }
 
+    /// <summary>
+    /// Verifies that the configured patterns are stripped from a filename that is then renamed.
+    /// </summary>
     [Theory]
     [InlineData("prefix-test.txt", "test.txt")]
     [InlineData("test_old.txt", "test.txt")]
@@ -93,6 +99,9 @@ public class FilenameNormalizerTests
             A<string>.That.Matches(x => x == filePathDestination))).MustHaveHappenedOnceExactly();
     }
 
+    /// <summary>
+    /// Verifies that renaming in a folder that does not exist logs an error instead of touching files.
+    /// </summary>
     [Fact]
     public void RenameFilesToMeetOsRequirements_WhenFolderDoesNotExist_ShouldLogError()
     {
@@ -109,6 +118,9 @@ public class FilenameNormalizerTests
         sut.Logger.Errors.ShouldContain(e => e.Contains("does not exist"));
     }
 
+    /// <summary>
+    /// Verifies that an already valid filename is left in place with a warning and no move.
+    /// </summary>
     [Theory]
     [InlineData("test.txt")]
     [InlineData("normal file.doc")]

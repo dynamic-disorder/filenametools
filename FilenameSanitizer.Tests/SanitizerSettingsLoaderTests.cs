@@ -12,6 +12,10 @@ namespace FilenameSanitizer.Tests;
 public class SanitizerSettingsLoaderTests
 {
     private static readonly string[] s_expectedExcludedChars = ["-", "@"];
+
+    /// <summary>
+    /// Verifies that a missing settings file falls back to the default character and no exclusions.
+    /// </summary>
     [Fact]
     public void LoadFromFile_ReturnsDefaultSettings_WhenFileDoesNotExist()
     {
@@ -27,6 +31,9 @@ public class SanitizerSettingsLoaderTests
         result.ExcludedCharacters.ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// Verifies that a valid settings file is deserialised into the replacement character and exclusions.
+    /// </summary>
     [Fact]
     public void LoadFromFile_ReturnsDeserializedSettings_WhenFileExistsAndIsValid()
     {
@@ -47,6 +54,9 @@ public class SanitizerSettingsLoaderTests
         result.ExcludedCharacters.ShouldBe(s_expectedExcludedChars);
     }
 
+    /// <summary>
+    /// Verifies that malformed settings JSON is logged and falls back to the default settings.
+    /// </summary>
     [Fact]
     public void LoadFromFile_LogsErrorAndReturnsDefault_WhenDeserializationFails()
     {
@@ -64,6 +74,9 @@ public class SanitizerSettingsLoaderTests
         A.CallTo(() => logger.LogError(A<string>.Ignored, A<System.Exception>.Ignored)).MustHaveHappened();
     }
 
+    /// <summary>
+    /// Verifies that settings are looked up inside the base directory the loader was given.
+    /// </summary>
     [Fact]
     public void LoadFromFile_UsesProvidedBaseDirectory()
     {
