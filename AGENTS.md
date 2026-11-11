@@ -8,7 +8,7 @@
 | **DoD** | A session can build and test the solution, change sanitisation behaviour without breaking portability, and explain every file under `.agents/`. |
 | **Top risk** | Renaming or re-casing a project directory without updating every `ProjectReference`, which builds on Windows and fails on Linux — the primary platform. |
 
-Loaded automatically by DSH as workspace instructions for anything under `filenametools/`.
+Loaded automatically as workspace instructions for anything under `filenametools/`.
 
 ## What this repository is
 
@@ -79,27 +79,24 @@ Do not describe the current behaviour as working around it: the CLI advertises p
 
 ## The commit gate
 
-`core.hooksPath` is `.githooks`, so `.githooks/pre-commit` runs on every commit and execs `.agents/hooks/pre-commit-build-check.sh`. That script is also the harness `PreToolUse` hook, wired in `.agents/settings.json` with the matcher `bash|Bash`.
+`core.hooksPath` is `.githooks`, so `.githooks/pre-commit` runs on every commit and execs `.agents/hooks/pre-commit-build-check.sh`. The git hook is the only entry point; there is no harness hook to rely on.
 
 It exits 0 at once unless something staged matches `.cs`, `.csproj`, `.props` or `.targets`; otherwise it builds the solution (falling back to the nearest project), retries a failure once for the Windows file lock, and exits 2 to block the commit with the compiler output as the reason. A read-only workspace makes it warn and allow rather than block on `MSB3061`.
 
 Both scripts must keep their executable bit (`100755` in the index). They were stored `100644`, which Windows hides because MSYS marks every file executable, and which makes a Linux clone skip the gate silently.
 
-`.agents/settings.json` is only effective when a harness is pointed at it; Claude Code looks in `.claude/`, which no longer exists. The git hook path works regardless.
+The git hook above is the gate that always runs; there is no settings file to arm.
 
 ## Agent surfaces
 
 | Path | Read by | Holds |
 | :--- | :--- | :--- |
-| `AGENTS.md` | DSH and any agent | This file: conventions and gotchas |
-| `.clinerules` | Cline | Platform, build and commit rules |
-| `.github/copilot-instructions.md`, `.github/copilot/customization.json` | GitHub Copilot | Suggestion-level style and testing guidance |
-| `.agents/skills/` | Every harness | Eight tracked skills, including `unit-test-writer` |
-| `.agents/commands/build.md` | Claude Code-format harnesses | Build and test command |
-| `.agents/rules/filename-sanitization.md` | Claude Code-format harnesses | Domain rules scoped to `**/*.cs`, `**/*.csproj`, `sanitizer_*` |
-| `.claudeignore` | Claude Code | Files to keep out of context |
+| `AGENTS.md` | Any agent | This file: conventions and gotchas |
+| `.agents/skills/` | Any agent | Eight tracked skills, including `unit-test-writer` |
+| `.agents/commands/build.md` | Harnesses that read `.agents/commands/` | Build and test command |
+| `.agents/rules/filename-sanitization.md` | Harnesses that read `.agents/rules/` | Domain rules scoped to `**/*.cs`, `**/*.csproj`, `sanitizer_*` |
 
-Keep these consistent when a rule changes: the sanitisation contract appears in this file, `.clinerules` and `.agents/rules/filename-sanitization.md`.
+Keep these consistent when a rule changes: the sanitisation contract appears in this file and `.agents/rules/filename-sanitization.md`.
 
 ## Verification
 
@@ -124,12 +121,10 @@ The documented defect means `prefix-test.txt` stays unchanged and the log says "
 | :--- | :--- | :--- |
 | README and `.agents/commands/build.md` quote a test count | Any count rots; the run is the measurement | Do not add a new count |
 | `RepositoryUrl` in `FilenameSanitizer.csproj` points at the prototype-k umbrella | This package lives in this repository | Update it only with a version bump, since it is package metadata |
-| A `.claude/` directory is expected | Merged into `.agents/` and deleted; `.claudeignore` remains | Do not recreate `.claude/` |
-| `.agents/settings.json` looks like it arms the hook | No harness reads that path by default | Rely on `.githooks` |
 | `bin/`, `obj/`, `publish/` and `*.log` exist in the tree | Git-ignored build and run output | Never stage them |
 
 ## Where work is recorded
 
 Investigation and research output goes to `local_user_files/`, which is git-ignored except for its README. A finding that only the owner can confirm stays an open item in the reply, not a claim in a file.
 
-Documentation: this file replaces `CLAUDE.md` as the agent entry point. `.clinerules`, `.gitignore`, `.githooks/pre-commit` and `.agents/settings.json` were repointed from `.claude/` to `.agents/`, and the build gate's executable bit was restored.
+Documentation: this file is the agent entry point. The per-tool files (`.clinerules`, `.claudeignore`, `.github/copilot-instructions.md`, `.github/copilot/customization.json`, `.agents/settings.json`) were removed on 2026-11-11 so nothing duplicates it.
