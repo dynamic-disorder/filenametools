@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-using NSubstitute;
+using FakeItEasy;
 
 using Shouldly;
 
@@ -16,10 +16,10 @@ public class PatternLoaderTests
     public void PatternLoader_LoadReplacementPatterns_WhenFileExists_ShouldLoadPatterns()
     {
         // Given: a mocked file system with patterns
-        var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.Combine(Arg.Any<string>(), Arg.Any<string>()).Returns("test_patterns.txt");
-        fileSystem.FileExists("test_patterns.txt").Returns(true);
-        fileSystem.ReadAllLines("test_patterns.txt").Returns(s_testPatternLines);
+        var fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => fileSystem.Combine(A<string[]>.Ignored)).Returns("test_patterns.txt");
+        A.CallTo(() => fileSystem.FileExists("test_patterns.txt")).Returns(true);
+        A.CallTo(() => fileSystem.ReadAllLines("test_patterns.txt")).Returns(s_testPatternLines);
         
         var patternLoader = new PatternLoader(fileSystem);
         
@@ -35,9 +35,9 @@ public class PatternLoaderTests
     public void PatternLoader_LoadReplacementPatterns_WhenFileDoesNotExist_ShouldReturnEmptyList()
     {
         // Given: a mocked file system without patterns file
-        var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.Combine(Arg.Any<string>(), Arg.Any<string>()).Returns("test_patterns.txt");
-        fileSystem.FileExists("test_patterns.txt").Returns(false);
+        var fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => fileSystem.Combine(A<string[]>.Ignored)).Returns("test_patterns.txt");
+        A.CallTo(() => fileSystem.FileExists("test_patterns.txt")).Returns(false);
         
         var patternLoader = new PatternLoader(fileSystem);
         
@@ -55,7 +55,7 @@ public class PatternLoaderTests
         // Given: patterns and replacement character
         var patterns = new List<string> { "bad", "big", "wolf", "_" };
         var replacement = " ";
-        var patternLoader = new PatternLoader(Substitute.For<IFileSystem>());
+        var patternLoader = new PatternLoader(A.Fake<IFileSystem>());
         
         // When: applying patterns
         var result = patternLoader.ApplyReplacementPatterns("test_bad_big_wolf.txt", patterns, replacement);
@@ -70,7 +70,7 @@ public class PatternLoaderTests
         // Given: empty patterns list
         var patterns = new List<string>();
         var replacement = " ";
-        var patternLoader = new PatternLoader(Substitute.For<IFileSystem>());
+        var patternLoader = new PatternLoader(A.Fake<IFileSystem>());
         
         // When: applying empty patterns
         var result = patternLoader.ApplyReplacementPatterns("test_file.txt", patterns, replacement);
@@ -85,7 +85,7 @@ public class PatternLoaderTests
         // Given: patterns that include characters that might be excluded elsewhere
         var patterns = new List<string> { "bad", "big" };
         var replacement = " ";
-        var patternLoader = new PatternLoader(Substitute.For<IFileSystem>());
+        var patternLoader = new PatternLoader(A.Fake<IFileSystem>());
         
         // When: applying patterns to a string containing dash (which is excluded in settings)
         var input = "test-bad-big.txt";
@@ -99,12 +99,12 @@ public class PatternLoaderTests
     public void PatternLoader_GetInvalidCharacters_WhenDashExcluded_ShouldNotIncludeDash()
     {
         // Given: settings with dash excluded
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string> { "-" });
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string> { "-" });
         
-        var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.GetInvalidFilenameChars().Returns(s_testInvalidChars);
+        var fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => fileSystem.GetInvalidFilenameChars()).Returns(s_testInvalidChars);
         
         var patternLoader = new PatternLoader(fileSystem);
         
@@ -122,12 +122,12 @@ public class PatternLoaderTests
     public void PatternLoader_GetInvalidCharacters_WhenReplacementCharacterIsDash_ShouldNotIncludeDash()
     {
         // Given: settings with dash as replacement character
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("-");
-        settings.ExcludedCharacters.Returns(new List<string>());
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("-");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string>());
         
-        var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.GetInvalidFilenameChars().Returns(s_testInvalidChars);
+        var fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => fileSystem.GetInvalidFilenameChars()).Returns(s_testInvalidChars);
         
         var patternLoader = new PatternLoader(fileSystem);
         
@@ -145,12 +145,12 @@ public class PatternLoaderTests
     public void PatternLoader_GetInvalidCharacters_WithNoExclusions_ShouldIncludeAllInvalidChars()
     {
         // Given: settings with no excluded characters and different replacement character
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string>());
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string>());
         
-        var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.GetInvalidFilenameChars().Returns(s_testInvalidChars);
+        var fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => fileSystem.GetInvalidFilenameChars()).Returns(s_testInvalidChars);
         
         var patternLoader = new PatternLoader(fileSystem);
         
@@ -168,11 +168,11 @@ public class PatternLoaderTests
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsReplacement_ShouldReturnFalse()
     {
         // Given: settings with underscore as replacement character
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string>());
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string>());
         
-        var fileSystem = Substitute.For<IFileSystem>();
+        var fileSystem = A.Fake<IFileSystem>();
         var patternLoader = new PatternLoader(fileSystem);
         
         // When: checking if underscore should be included
@@ -186,11 +186,11 @@ public class PatternLoaderTests
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsExcluded_ShouldReturnFalse()
     {
         // Given: settings with dash excluded
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string> { "-" });
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string> { "-" });
         
-        var fileSystem = Substitute.For<IFileSystem>();
+        var fileSystem = A.Fake<IFileSystem>();
         var patternLoader = new PatternLoader(fileSystem);
         
         // When: checking if dash should be included
@@ -204,11 +204,11 @@ public class PatternLoaderTests
     public void PatternLoader_ShouldIncludeCharacter_WhenCharacterIsValid_ShouldReturnTrue()
     {
         // Given: settings with no exclusions for the character
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string>());
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string>());
         
-        var fileSystem = Substitute.For<IFileSystem>();
+        var fileSystem = A.Fake<IFileSystem>();
         var patternLoader = new PatternLoader(fileSystem);
         
         // When: checking if an invalid character should be included

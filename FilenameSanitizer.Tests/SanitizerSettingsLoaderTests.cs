@@ -1,4 +1,4 @@
-using NSubstitute;
+using FakeItEasy;
 
 using Shouldly;
 
@@ -15,9 +15,9 @@ public class SanitizerSettingsLoaderTests
     [Fact]
     public void LoadFromFile_ReturnsDefaultSettings_WhenFileDoesNotExist()
     {
-        var fileSystem = Substitute.For<IFileSystem>();
-        var logger = Substitute.For<ILogger>();
-        fileSystem.FileExists(Arg.Any<string>()).Returns(false);
+        var fileSystem = A.Fake<IFileSystem>();
+        var logger = A.Fake<ILogger>();
+        A.CallTo(() => fileSystem.FileExists(A<string>.Ignored)).Returns(false);
         var loader = new SanitizerSettingsLoader(fileSystem, logger);
 
         var result = loader.LoadFromFile("nonexistent.json");
@@ -30,11 +30,11 @@ public class SanitizerSettingsLoaderTests
     [Fact]
     public void LoadFromFile_ReturnsDeserializedSettings_WhenFileExistsAndIsValid()
     {
-        var fileSystem = Substitute.For<IFileSystem>();
-        var logger = Substitute.For<ILogger>();
-        fileSystem.FileExists(Arg.Any<string>()).Returns(true);
+        var fileSystem = A.Fake<IFileSystem>();
+        var logger = A.Fake<ILogger>();
+        A.CallTo(() => fileSystem.FileExists(A<string>.Ignored)).Returns(true);
         var json = """{"ReplacementCharacter": "#", "ExcludedCharacters": ["-", "@"]}""";
-        fileSystem.ReadAllText(Arg.Any<string>()).Returns(json);
+        A.CallTo(() => fileSystem.ReadAllText(A<string>.Ignored)).Returns(json);
         var loader = new SanitizerSettingsLoader(fileSystem, logger);
 
         // Given: a settings file exists with ReplacementCharacter '#' and ExcludedCharacters ['-','@']
@@ -50,10 +50,10 @@ public class SanitizerSettingsLoaderTests
     [Fact]
     public void LoadFromFile_LogsErrorAndReturnsDefault_WhenDeserializationFails()
     {
-        var fileSystem = Substitute.For<IFileSystem>();
-        var logger = Substitute.For<ILogger>();
-        fileSystem.FileExists(Arg.Any<string>()).Returns(true);
-        fileSystem.ReadAllText(Arg.Any<string>()).Returns("not valid json");
+        var fileSystem = A.Fake<IFileSystem>();
+        var logger = A.Fake<ILogger>();
+        A.CallTo(() => fileSystem.FileExists(A<string>.Ignored)).Returns(true);
+        A.CallTo(() => fileSystem.ReadAllText(A<string>.Ignored)).Returns("not valid json");
         var loader = new SanitizerSettingsLoader(fileSystem, logger);
 
         var result = loader.LoadFromFile("settings.json");
@@ -61,15 +61,15 @@ public class SanitizerSettingsLoaderTests
         result.ShouldNotBeNull();
         result.ReplacementCharacter.ShouldBe(SanitizerSetting.DefaultCharacter);
         result.ExcludedCharacters.ShouldBeEmpty();
-        logger.Received().LogError(Arg.Any<string>(), Arg.Any<Exception>());
+        A.CallTo(() => logger.LogError(A<string>.Ignored, A<System.Exception>.Ignored)).MustHaveHappened();
     }
 
     [Fact]
     public void LoadFromFile_UsesProvidedBaseDirectory()
     {
-        var fileSystem = Substitute.For<IFileSystem>();
-        var logger = Substitute.For<ILogger>();
-        fileSystem.FileExists(Arg.Any<string>()).Returns(false);
+        var fileSystem = A.Fake<IFileSystem>();
+        var logger = A.Fake<ILogger>();
+        A.CallTo(() => fileSystem.FileExists(A<string>.Ignored)).Returns(false);
         var customBaseDir = "/custom/base/dir";
         var loader = new SanitizerSettingsLoader(fileSystem, logger, customBaseDir);
 
@@ -77,6 +77,6 @@ public class SanitizerSettingsLoaderTests
         loader.LoadFromFile("settings.json");
 
         // Then: the loader checks for the file in the provided base directory
-        fileSystem.Received().FileExists(Path.Combine(customBaseDir, "settings.json"));
+        A.CallTo(() => fileSystem.FileExists(Path.Combine(customBaseDir, "settings.json"))).MustHaveHappened();
     }
 }

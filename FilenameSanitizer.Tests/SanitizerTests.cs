@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-using NSubstitute;
+using FakeItEasy;
 
 using Shouldly;
 
@@ -13,65 +13,62 @@ public class SanitizerTests
     private static Sanitizer SetUpSut(string replacementCharacter = "_", List<string>? excludedChars = null)
     {
         var patternLoader = CreatePatternLoaderWithNoPatterns();
-        return SetUpSut(replacementCharacter, excludedChars, patternLoader, Substitute.For<IFileSystem>());
+        return SetUpSut(replacementCharacter, excludedChars, patternLoader, A.Fake<IFileSystem>());
     }
 
     private static IPatternLoader CreatePatternLoaderWithNoPatterns()
     {
-        var patternLoader = Substitute.For<IPatternLoader>();
-        patternLoader.LoadReplacementPatterns().Returns(new List<string>());
-        patternLoader.GetInvalidCharacters(Arg.Any<ISanitizerSetting>()).Returns(call =>
-        {
-            var settings = call.Arg<ISanitizerSetting>();
-            // Simulate default invalid characters - include all special characters that should be replaced
-            var invalidChars = new List<char> { 
-                ':', '/', '\\', '<', '>', '"', '|', '?', '*', '=', '`', '\'', '¨', '~', '^', 
-                '@', '£', '€', '$', ';', '-', '&', '!', '[', ']', '{', '}', '(', ')'
-            };
-            // Exclude replacement character
-            if (settings.ReplacementCharacter != null)
+        var patternLoader = A.Fake<IPatternLoader>();
+        A.CallTo(() => patternLoader.LoadReplacementPatterns()).Returns(new List<string>());
+        A.CallTo(() => patternLoader.GetInvalidCharacters(A<ISanitizerSetting>.Ignored))
+            .ReturnsLazily((ISanitizerSetting settings) =>
             {
-                invalidChars.RemoveAll(c => c.ToString() == settings.ReplacementCharacter);
-            }
-            // Exclude excluded characters
-            if (settings.ExcludedCharacters != null)
-            {
-                invalidChars.RemoveAll(c => settings.ExcludedCharacters.Contains(c.ToString()));
-            }
-            return invalidChars.ToArray();
-        });
-        patternLoader.ApplyReplacementPatterns(Arg.Any<string>(), Arg.Any<List<string>>(), Arg.Any<string>())
-            .Returns(call => call.Arg<string>()); // Return unchanged by default
+                // Simulate default invalid characters - include all special characters that should be replaced
+                var invalidChars = new List<char> { 
+                    ':', '/', '\\', '<', '>', '"', '|', '?', '*', '=', '`', '\'', '¨', '~', '^', 
+                    '@', '£', '€', '$', ';', '-', '&', '!', '[', ']', '{', '}', '(', ')'
+                };
+                // Exclude replacement character
+                if (settings.ReplacementCharacter != null)
+                {
+                    invalidChars.RemoveAll(c => c.ToString() == settings.ReplacementCharacter);
+                }
+                // Exclude excluded characters
+                if (settings.ExcludedCharacters != null)
+                {
+                    invalidChars.RemoveAll(c => settings.ExcludedCharacters.Contains(c.ToString()));
+                }
+                return invalidChars.ToArray();
+            });
+        A.CallTo(() => patternLoader.ApplyReplacementPatterns(A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
+            .ReturnsLazily((string filename, List<string> patterns, string replacement) => filename); // Return unchanged by default
         return patternLoader;
     }
 
     private static IPatternLoader CreatePatternLoaderWithPatterns(List<string> patterns)
     {
-        var patternLoader = Substitute.For<IPatternLoader>();
-        patternLoader.LoadReplacementPatterns().Returns(patterns);
-        patternLoader.GetInvalidCharacters(Arg.Any<ISanitizerSetting>()).Returns(call =>
-        {
-            var settings = call.Arg<ISanitizerSetting>();
-            var invalidChars = new List<char> { 
-                ':', '/', '\\', '<', '>', '"', '|', '?', '*', '=', '`', '\'', '¨', '~', '^', 
-                '@', '£', '€', '$', ';', '-', '&', '!', '[', ']', '{', '}', '(', ')' 
-            };
-            if (settings.ReplacementCharacter != null)
+        var patternLoader = A.Fake<IPatternLoader>();
+        A.CallTo(() => patternLoader.LoadReplacementPatterns()).Returns(patterns);
+        A.CallTo(() => patternLoader.GetInvalidCharacters(A<ISanitizerSetting>.Ignored))
+            .ReturnsLazily((ISanitizerSetting settings) =>
             {
-                invalidChars.RemoveAll(c => c.ToString() == settings.ReplacementCharacter);
-            }
-            if (settings.ExcludedCharacters != null)
+                var invalidChars = new List<char> { 
+                    ':', '/', '\\', '<', '>', '"', '|', '?', '*', '=', '`', '\'', '¨', '~', '^', 
+                    '@', '£', '€', '$', ';', '-', '&', '!', '[', ']', '{', '}', '(', ')' 
+                };
+                if (settings.ReplacementCharacter != null)
+                {
+                    invalidChars.RemoveAll(c => c.ToString() == settings.ReplacementCharacter);
+                }
+                if (settings.ExcludedCharacters != null)
+                {
+                    invalidChars.RemoveAll(c => settings.ExcludedCharacters.Contains(c.ToString()));
+                }
+                return invalidChars.ToArray();
+            });
+        A.CallTo(() => patternLoader.ApplyReplacementPatterns(A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
+            .ReturnsLazily((string filename, List<string> pats, string replacement) =>
             {
-                invalidChars.RemoveAll(c => settings.ExcludedCharacters.Contains(c.ToString()));
-            }
-            return invalidChars.ToArray();
-        });
-        patternLoader.ApplyReplacementPatterns(Arg.Any<string>(), Arg.Any<List<string>>(), Arg.Any<string>())
-            .Returns(call =>
-            {
-                var filename = call.ArgAt<string>(0);
-                var pats = call.ArgAt<List<string>>(1);
-                var replacement = call.ArgAt<string>(2);
                 foreach (var p in pats)
                 {
                     filename = filename.Replace(p, replacement);
@@ -84,24 +81,18 @@ public class SanitizerTests
     private static Sanitizer SetUpSut(string replacementCharacter, List<string>? excludedChars, IPatternLoader patternLoader, IFileSystem fileSystem)
     {
         // Initialize any required settings or dependencies here
-        var sanitizerSettingsLoader = Substitute.For<ISanitizerSettingsLoader>();
-        var sanitizerSetting = Substitute.For<ISanitizerSetting>();
-        sanitizerSetting.ReplacementCharacter.Returns(replacementCharacter);
-        sanitizerSetting.ExcludedCharacters.Returns(excludedChars ?? new List<string>());
-        sanitizerSettingsLoader.LoadFromFile(Arg.Any<string>()).Returns(sanitizerSetting);
+        var sanitizerSettingsLoader = A.Fake<ISanitizerSettingsLoader>();
+        var sanitizerSetting = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => sanitizerSetting.ReplacementCharacter).Returns(replacementCharacter);
+        A.CallTo(() => sanitizerSetting.ExcludedCharacters).Returns(excludedChars ?? new List<string>());
+        A.CallTo(() => sanitizerSettingsLoader.LoadFromFile(A<string>.Ignored)).Returns(sanitizerSetting);
 
         // Set up file system defaults
-        fileSystem.GetExtension(Arg.Any<string>()).Returns(call =>
-        {
-            var path = call.Arg<string>();
-            return Path.GetExtension(path);
-        });
-        fileSystem.GetFilenameWithoutExtension(Arg.Any<string>()).Returns(call =>
-        {
-            var path = call.Arg<string>();
-            return Path.GetFileNameWithoutExtension(path);
-        });
-        fileSystem.GetInvalidFilenameChars().Returns(Path.GetInvalidFileNameChars());
+        A.CallTo(() => fileSystem.GetExtension(A<string>.Ignored))
+            .ReturnsLazily((string path) => Path.GetExtension(path));
+        A.CallTo(() => fileSystem.GetFilenameWithoutExtension(A<string>.Ignored))
+            .ReturnsLazily((string path) => Path.GetFileNameWithoutExtension(path));
+        A.CallTo(() => fileSystem.GetInvalidFilenameChars()).Returns(Path.GetInvalidFileNameChars());
 
         return new Sanitizer(sanitizerSettingsLoader, patternLoader, fileSystem);
     }
@@ -295,15 +286,14 @@ public class SanitizerTests
     public void GetInvalidCharacters_WhenDashExcluded_ShouldNotIncludeDash()
     {
         // Given: settings with dash excluded
-        var settings = Substitute.For<ISanitizerSetting>();
-        settings.ReplacementCharacter.Returns("_");
-        settings.ExcludedCharacters.Returns(new List<string> { "-" });
+        var settings = A.Fake<ISanitizerSetting>();
+        A.CallTo(() => settings.ReplacementCharacter).Returns("_");
+        A.CallTo(() => settings.ExcludedCharacters).Returns(new List<string> { "-" });
 
         // When: getting invalid characters via pattern loader
-        var patternLoader = Substitute.For<IPatternLoader>();
-        patternLoader.GetInvalidCharacters(Arg.Any<ISanitizerSetting>())
-            .Returns(call => {
-                var s = call.Arg<ISanitizerSetting>();
+        var patternLoader = A.Fake<IPatternLoader>();
+        A.CallTo(() => patternLoader.GetInvalidCharacters(A<ISanitizerSetting>.Ignored))
+            .ReturnsLazily((ISanitizerSetting s) => {
                 // Simulate behavior: exclude dash when in excluded characters
                 var invalidChars = new List<char> { '!', '?', '@' };
                 if (!s.ExcludedCharacters.Contains("-"))
@@ -311,7 +301,7 @@ public class SanitizerTests
                 return invalidChars.ToArray();
             });
 
-        var sut = SetUpSut("_", new List<string> { "-" }, patternLoader, Substitute.For<IFileSystem>());
+        var sut = SetUpSut("_", new List<string> { "-" }, patternLoader, A.Fake<IFileSystem>());
 
         // When: sanitizing a filename with dash
         var result = sut.SanitizeFilename("test-file.txt");
@@ -326,7 +316,7 @@ public class SanitizerTests
         // Given: sanitizer configured with space replacement, dash excluded, and patterns that include "bad"
         var patterns = new List<string> { "bad" };
         var patternLoader = CreatePatternLoaderWithPatterns(patterns);
-        var fileSystem = Substitute.For<IFileSystem>();
+        var fileSystem = A.Fake<IFileSystem>();
         var sut = SetUpSut(" ", new List<string> { "-", "#" }, patternLoader, fileSystem);
 
         // When: sanitizing the complex filename
@@ -351,14 +341,14 @@ public class SanitizerTests
         // Given: mocked pattern loader that returns patterns
         var patterns = new List<string> { "bad", "big" };
         var patternLoader = CreatePatternLoaderWithPatterns(patterns);
-        var fileSystem = Substitute.For<IFileSystem>();
+        var fileSystem = A.Fake<IFileSystem>();
         var sut = SetUpSut(" ", new List<string>(), patternLoader, fileSystem);
 
         // When: calling SanitizeFilename which internally calls SanitizeWithSettings
         _ = sut.SanitizeFilename("testbadbig.txt");
 
         // Then: pattern loader should have been called
-        patternLoader.Received(1).LoadReplacementPatterns();
-        patternLoader.Received(1).ApplyReplacementPatterns(Arg.Any<string>(), patterns, " ");
+        A.CallTo(() => patternLoader.LoadReplacementPatterns()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => patternLoader.ApplyReplacementPatterns(A<string>.Ignored, patterns, " ")).MustHaveHappenedOnceExactly();
     }
 }

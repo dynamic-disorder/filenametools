@@ -1,4 +1,4 @@
-using NSubstitute;
+using FakeItEasy;
 
 using Shouldly;
 
@@ -20,9 +20,9 @@ public class FilenameNormalizerTests
 
     public FilenameNormalizerTests()
     {
-        _fileSystem = Substitute.For<IFileSystem>();
-        _fileSystem.DirectoryExists(TestFolder).Returns(true);
-        _sanitizer = Substitute.For<ISanitizer>();
+        _fileSystem = A.Fake<IFileSystem>();
+        A.CallTo(() => _fileSystem.DirectoryExists(TestFolder)).Returns(true);
+        _sanitizer = A.Fake<ISanitizer>();
         SetUpSut();
     }
 
@@ -36,19 +36,19 @@ public class FilenameNormalizerTests
     {
         var filePathSource = Path.Combine(TestFolder, originalName);
         var filePathDestination = Path.Combine(TestFolder, expectedName);
-        _fileSystem.GetFiles(TestFolder).Returns(new[] { filePathSource });
-        _fileSystem.FileExists(filePathDestination).Returns(false);
-        _sanitizer.SanitizeFilename(originalName).Returns(expectedName);
-        _sanitizer.IsFilenameSanitized(originalName).Returns(false);
+        A.CallTo(() => _fileSystem.GetFiles(TestFolder)).Returns(new[] { filePathSource });
+        A.CallTo(() => _fileSystem.FileExists(filePathDestination)).Returns(false);
+        A.CallTo(() => _sanitizer.SanitizeFilename(originalName)).Returns(expectedName);
+        A.CallTo(() => _sanitizer.IsFilenameSanitized(originalName)).Returns(false);
         return (filePathSource, filePathDestination);
     }
 
     private string GivenFileAlreadySanitized(string filename)
     {
         var filePath = Path.Combine(TestFolder, filename);
-        _fileSystem.GetFiles(TestFolder).Returns(new[] { filePath });
-        _sanitizer.IsFilenameSanitized(filename).Returns(true);
-        _sanitizer.SanitizeFilename(filename).Returns(filename);
+        A.CallTo(() => _fileSystem.GetFiles(TestFolder)).Returns(new[] { filePath });
+        A.CallTo(() => _sanitizer.IsFilenameSanitized(filename)).Returns(true);
+        A.CallTo(() => _sanitizer.SanitizeFilename(filename)).Returns(filename);
         return filePath;
     }
 
@@ -68,7 +68,7 @@ public class FilenameNormalizerTests
 
         // Then: no errors are logged and the file is moved to the destination
         sut.Logger.HasErrors.ShouldBeFalse();
-        _fileSystem.Received(1).MoveFile(filePathSource, filePathDestination);
+        A.CallTo(() => _fileSystem.MoveFile(filePathSource, filePathDestination)).MustHaveHappenedOnceExactly();
     }
 
     [Theory]
@@ -79,7 +79,7 @@ public class FilenameNormalizerTests
     {
         // Given: a single source file exists and the patterns list contains 'prefix-', '_old', '.bak'
         var (filePathSource, filePathDestination) = GivenSingleFile(originalName, expectedName);
-        _fileSystem.FileExists(filePathDestination).Returns(false);
+        A.CallTo(() => _fileSystem.FileExists(filePathDestination)).Returns(false);
         var patterns = string.Join(Environment.NewLine, "prefix-", "_old", ".bak");
         var sut = SetUpSut();
 
@@ -88,9 +88,9 @@ public class FilenameNormalizerTests
 
         // Then: no errors are logged and the file is moved to the expected destination
         sut.Logger.HasErrors.ShouldBeFalse();
-        _fileSystem.Received(1).MoveFile(
-            Arg.Is<string>(x => x == filePathSource),
-            Arg.Is<string>(x => x == filePathDestination));
+        A.CallTo(() => _fileSystem.MoveFile(
+            A<string>.That.Matches(x => x == filePathSource),
+            A<string>.That.Matches(x => x == filePathDestination))).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class FilenameNormalizerTests
     {
         // Given: a non-existent folder and the file system reports DirectoryExists=false
         var nonExistentFolder = Path.Combine(TestFolder, "NonExistent");
-        _fileSystem.DirectoryExists(nonExistentFolder).Returns(false);
+        A.CallTo(() => _fileSystem.DirectoryExists(nonExistentFolder)).Returns(false);
         var sut = new FilenameNormalizer(nonExistentFolder, _sanitizer, _fileSystem);
 
         // When: attempting to rename files in the non-existent folder
@@ -124,6 +124,6 @@ public class FilenameNormalizerTests
         // Then: a warning is logged and no file move is performed
         sut.Logger.HasWarnings.ShouldBeTrue();
         sut.Logger.Warnings.ShouldContain(w => w.Contains("already sanitized"));
-        _fileSystem.DidNotReceive().MoveFile(Arg.Any<string>(), Arg.Any<string>());
+        A.CallTo(() => _fileSystem.MoveFile(A<string>.Ignored, A<string>.Ignored)).MustNotHaveHappened();
     }
 }

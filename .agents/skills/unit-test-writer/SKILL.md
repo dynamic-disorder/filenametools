@@ -1,13 +1,13 @@
 ---
 name: unit-test-writer
-description: Write xUnit tests with Shouldly assertions and NSubstitute substitutes for the C# projects that have tests.
+description: Write xUnit tests with Shouldly assertions and FakeItEasy fakes for the C# projects that have tests.
 ---
 
 # unit-test-writer
 
-xUnit, **Shouldly** for assertions, **NSubstitute** for substitutes. **Moq is banned** (its
-SponsorLink history) — use `Substitute.For<T>()` or a hand-written fake. Confirm against the
-target test project's package references before adding a new dependency.
+xUnit, **Shouldly** for assertions, **FakeItEasy** for fakes. **Moq is banned** (its
+SponsorLink history) — use `A.Fake<T>()` or a hand-written fake. Confirm against the target test
+project's package references before adding a new dependency.
 
 ## Where tests live
 
@@ -26,30 +26,33 @@ at restore on Linux.
   `.csproj` carries `<NoWarn>CA1707</NoWarn>`.
 - `// Given:` / `// When:` / `// Then:` sections; `[Theory]` + `[InlineData]` for parameterized cases.
 - Name the system under test `sut`, built by a small scenario-specific factory rather than a field.
-- Assert observable outcomes; reach for `Received()` mainly on error paths where there is no state
-  to observe. Prefer one hand-written fake over repeated substitute setup shared by many tests.
+- Assert observable outcomes; reach for `A.CallTo(...).MustHaveHappened()` mainly on error paths
+  where there is no state to observe. Prefer one hand-written fake over repeated `A.Fake` setup
+  shared by many tests.
 - Don't run the tests unless asked.
 
 ```csharp
+using FakeItEasy;
+
 namespace Parser.Tests;
 
 /// <summary>Covers parsing a row and reporting the fields it found.</summary>
 public sealed class ParserTests
 {
-    private readonly IStore _store = Substitute.For<IStore>();
+    private readonly IStore _store = A.Fake<IStore>();
 
     [Fact]
     public void Parse_DirtyName_ReturnsSanitizedForm()
     {
         // Given: a row whose value needs normalising
-        _store.GetRows(Arg.Any<string>()).Returns(["bad name"]);
+        A.CallTo(() => _store.GetRows(A<string>.Ignored)).Returns(new[] { "bad name" });
         var sut = CreateParser();
 
         // When: the parser runs
         sut.Parse();
 
         // Then: the value was normalised before it was stored
-        _store.Received().Save("bad name", "bad_name");
+        A.CallTo(() => _store.Save("bad name", "bad_name")).MustHaveHappened();
     }
 }
 ```

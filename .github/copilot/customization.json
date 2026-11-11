@@ -38,7 +38,7 @@
                 "Unit Testing Guidelines:",
                 "- Use xUnit as the testing framework",
                 "- Use Shouldly for assertions",
-                "- Prefer NSubstitute over Moq for mocking",
+                "- Prefer FakeItEasy over Moq for faking",
                 "- Follow Setup/Test/Verify pattern in test methods",
                 "- Name system under test as 'sut' for local variables",
                 "- Name system under test as '_sut' for member variables",
