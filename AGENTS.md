@@ -4,8 +4,8 @@
 | :--- | :--- |
 | **Need** | A session with no memory of this repository: the three projects, the one casing rule that breaks Linux builds, the sanitisation contract, and the defect that is documented but not yet fixed. |
 | **Why** | The library decides what a filename may contain across three platforms. A wrong assumption either corrupts a real folder or silently skips a project at restore and fails at compile time. |
-| **What** | Project layout, the casing rule, build/test/run, the cross-platform sanitisation contract, the configuration files, the pattern-mode defect, and the `.agents/` configuration. Deliberately not repeated: `.editorconfig`, which owns formatting. |
-| **DoD** | A session can build and test the solution, change sanitisation behaviour without breaking portability, and explain every file under `.agents/`. |
+| **What** | Project layout, the casing rule, build/test/run, the cross-platform sanitisation contract, the configuration files, the pattern-mode defect, and the machine-level agent configuration it relies on. Deliberately not repeated: `.editorconfig`, which owns formatting. |
+| **DoD** | A session can build and test the solution, change sanitisation behaviour without breaking portability, and say where the gate and the skills come from. |
 | **Top risk** | Renaming or re-casing a project directory without updating every `ProjectReference`, which builds on Windows and fails on Linux — the primary platform. |
 
 Loaded automatically as workspace instructions for anything under `filenametools/`.
@@ -67,6 +67,17 @@ Configuration lives beside the library and is copied to output:
 | `FilenameSanitizer/sanitizer_settings.json` | `ReplacementCharacter`, `ExcludedCharacters` |
 | `FilenameSanitizer.log.<timestamp>.txt` | Audit trail written next to the processed folder; git-ignored |
 
+### Platform detail
+
+The sets behind the union, so a change to either side is checked against both:
+
+- **Windows:** `<>:"/\|?*`, plus control characters, plus the reserved names above.
+- **Linux and macOS:** `/` and the null byte.
+- **Separators:** Windows writes `\`, the other two `/`; the sanitizer never emits a separator at all.
+
+Filesystem operations are destructive here. Run the CLI against a scratch folder first, or take a backup:
+a rename applied to the wrong pass is not undoable from the log.
+
 ## Known defect — pattern mode is gated by the wrong predicate
 
 `FilenameNormalizer.RenameFileRemovingPatternsIfNeeded` (line 220) calls `ShouldRenameFile`, whose body asks `_sanitizer.IsFilenameSanitized(originalFilename)` (line 206). Any already-clean name satisfies that, so `prefix-test.txt` is logged as "already sanitized" instead of becoming `test.txt`.
@@ -79,31 +90,26 @@ Do not describe the current behaviour as working around it: the CLI advertises p
 
 ## The commit gate
 
-`core.hooksPath` is `.githooks`, so `.githooks/pre-commit` runs on every commit and execs `.agents/hooks/pre-commit-build-check.sh`. The git hook is the only entry point; there is no harness hook to rely on.
+The gate is machine-level. `core.hooksPath` is set globally to `~/.agents/githooks`, a link into the
+prototype-k checkout, so every commit here runs that hook: `scripts/scan-publication-leaks.sh` first,
+then `.agents/hooks/pre-commit-build-check.sh`. This repository carries no hook file of its own.
 
-It exits 0 at once unless something staged matches `.cs`, `.csproj`, `.props` or `.targets`; otherwise it builds the solution (falling back to the nearest project), retries a failure once for the Windows file lock, and exits 2 to block the commit with the compiler output as the reason. A read-only workspace makes it warn and allow rather than block on `MSB3061`.
-
-Both scripts must keep their executable bit (`100755` in the index). They were stored `100644`, which Windows hides because MSYS marks every file executable, and which makes a Linux clone skip the gate silently.
-
-The git hook above is the gate that always runs; there is no settings file to arm.
+It exits 0 at once unless something staged matches `.cs`, `.csproj`, `.props`, `.targets`, `.sln` or
+`.slnx`; otherwise it builds the solution (falling back to the nearest project), retries a failure once
+for the Windows file lock, and exits 2 to block the commit with the compiler output as the reason. A
+read-only workspace makes it warn and allow rather than block on `MSB3061`.
 
 ## Agent surfaces
 
-| Path | Read by | Holds |
-| :--- | :--- | :--- |
-| `AGENTS.md` | Any agent | This file: conventions and gotchas |
-| `.agents/skills/` | Any agent | Eight tracked skills, including `unit-test-writer` |
-| `.agents/commands/build.md` | Harnesses that read `.agents/commands/` | Build and test command |
-| `.agents/rules/filename-sanitization.md` | Harnesses that read `.agents/rules/` | Domain rules scoped to `**/*.cs`, `**/*.csproj`, `sanitizer_*` |
-
-Keep these consistent when a rule changes: the sanitisation contract appears in this file and `.agents/rules/filename-sanitization.md`.
+`AGENTS.md` is the only agent configuration file in this repository. The skills, the hooks and the
+shared rules are installed machine-wide from the prototype-k checkout (`~/.agents/skills/<name>`,
+`~/.agents/hooks`, `~/.agents/githooks`), so there is no `.agents/` directory here to keep in step.
 
 ## Verification
 
 ```bash
 dotnet build FilenameTools.sln          # exit 0, every error with file and line
 dotnet test FilenameTools.sln           # the suite is the authority on the count
-bash -n .agents/hooks/pre-commit-build-check.sh
 ```
 
 Run the CLI against a scratch directory before trusting a change with real files:
@@ -119,7 +125,7 @@ The documented defect means `prefix-test.txt` stays unchanged and the log says "
 
 | Claim or symptom | Reality | Action |
 | :--- | :--- | :--- |
-| README and `.agents/commands/build.md` quote a test count | Any count rots; the run is the measurement | Do not add a new count |
+| README quotes a test count | Any count rots; the run is the measurement | Do not add a new count |
 | `RepositoryUrl` in `FilenameSanitizer.csproj` points at the prototype-k umbrella | This package lives in this repository | Update it only with a version bump, since it is package metadata |
 | `bin/`, `obj/`, `publish/` and `*.log` exist in the tree | Git-ignored build and run output | Never stage them |
 
